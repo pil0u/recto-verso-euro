@@ -1,6 +1,7 @@
 /** The comparison screen: two sets, pick the one you prefer via big side buttons. */
 
 import type { Letter } from '../data/designs';
+import type { OrientMode } from '../session';
 import { t } from '../i18n';
 import { banknoteSet } from './banknoteSet';
 import { el, on } from './dom';
@@ -9,6 +10,7 @@ export interface CompareCallbacks {
   onChoose: (winner: Letter, loser: Letter) => void;
   onUndo: () => void;
   onShowResults: () => void;
+  onSetOrient: (mode: OrientMode) => void;
 }
 
 export interface CompareViewState {
@@ -16,6 +18,7 @@ export interface CompareViewState {
   count: number;
   confidence: number; // 0..1
   canUndo: boolean;
+  orient: OrientMode;
 }
 
 export function compareView(state: CompareViewState, cb: CompareCallbacks): HTMLElement {
@@ -55,7 +58,26 @@ export function compareView(state: CompareViewState, cb: CompareCallbacks): HTML
     return btn;
   };
 
-  const arena = el('div', { class: 'arena' }, [
+  const orientOptions: { mode: OrientMode; label: string }[] = [
+    { mode: 'default', label: t('orientDefault') },
+    { mode: 'landscape', label: t('orientLandscape') },
+    { mode: 'portrait', label: t('orientPortrait') },
+  ];
+  const orientControl = el(
+    'div',
+    { class: 'orient-toggle', role: 'group', 'aria-label': t('orientView') },
+    orientOptions.map((o) => {
+      const b = el('button', {
+        class: `orient${state.orient === o.mode ? ' active' : ''}`,
+        type: 'button',
+        text: o.label,
+      });
+      on(b, 'click', () => cb.onSetOrient(o.mode));
+      return b;
+    }),
+  );
+
+  const arena = el('div', { class: `arena mode-${state.orient}` }, [
     el('div', { class: 'side' }, [banknoteSet(a, { chrome: false, lazy: false })]),
     el('div', { class: 'side' }, [banknoteSet(b, { chrome: false, lazy: false })]),
   ]);
@@ -63,6 +85,7 @@ export function compareView(state: CompareViewState, cb: CompareCallbacks): HTML
   return el('section', { class: 'screen compare' }, [
     top,
     el('h2', { class: 'which', text: t('which') }),
+    orientControl,
     arena,
     preferBtn('left', a),
     preferBtn('right', b),

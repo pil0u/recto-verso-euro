@@ -9,15 +9,20 @@ import { RatingModel, type Comparison } from './engine/rating';
 
 const STORAGE_KEY = 'rve.session';
 
+export type OrientMode = 'default' | 'landscape' | 'portrait';
+
 export interface PersistedSession {
   comparisons: Comparison<Letter>[];
   peak: number;
   finished: boolean;
+  orient: OrientMode;
 }
 
 export class Session {
   private comparisons: Comparison<Letter>[] = [];
   finished = false;
+  /** How to display the notes: native, all-landscape, or all-portrait. */
+  orient: OrientMode = 'default';
   /** Highest confidence reached this run, so the displayed value never drops. */
   private peak = 0;
   private modelCache: RatingModel<Letter> | null = null;
@@ -89,6 +94,11 @@ export class Session {
     clearStored();
   }
 
+  setOrient(orient: OrientMode): void {
+    this.orient = orient;
+    this.save();
+  }
+
   private invalidate(): void {
     this.modelCache = null;
   }
@@ -98,6 +108,7 @@ export class Session {
       comparisons: this.comparisons,
       peak: this.peak,
       finished: this.finished,
+      orient: this.orient,
     };
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
@@ -117,6 +128,8 @@ export class Session {
         );
       }
       this.finished = Boolean(data.finished);
+      this.orient =
+        data.orient === 'landscape' || data.orient === 'portrait' ? data.orient : 'default';
       this.invalidate();
       this.peak =
         typeof data.peak === 'number'

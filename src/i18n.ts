@@ -28,8 +28,11 @@ interface Strings {
   preferLeft: string;
   preferRight: string;
   undo: string;
-  flip: string;
   showResults: string;
+  orientView: string;
+  orientDefault: string;
+  orientLandscape: string;
+  orientPortrait: string;
   confidence: string;
   keepComparing: string;
   earlyStopTitle: string;
@@ -70,8 +73,11 @@ const EN: Strings = {
   preferLeft: 'I prefer this one',
   preferRight: 'I prefer this one',
   undo: 'Undo',
-  flip: 'Rotate 90°',
   showResults: 'Show my results',
+  orientView: 'Orientation',
+  orientDefault: 'Default',
+  orientLandscape: 'Landscape',
+  orientPortrait: 'Portrait',
   confidence: 'Confidence',
   keepComparing: 'Keep comparing',
   earlyStopTitle: 'Heads up — your ranking still has gaps',
@@ -114,8 +120,11 @@ const FR: Strings = {
   preferLeft: 'Je préfère celle-ci',
   preferRight: 'Je préfère celle-ci',
   undo: 'Annuler',
-  flip: 'Pivoter à 90°',
   showResults: 'Voir mes résultats',
+  orientView: 'Orientation',
+  orientDefault: 'Défaut',
+  orientLandscape: 'Paysage',
+  orientPortrait: 'Portrait',
   confidence: 'Confiance',
   keepComparing: 'Continuer',
   earlyStopTitle: 'Attention — votre classement est incomplet',

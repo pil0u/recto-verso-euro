@@ -135,11 +135,16 @@ export class App {
             count: this.session.count(),
             confidence: this.session.confidence(),
             canUndo: this.session.canUndo(),
+            orient: this.session.orient,
           },
           {
             onChoose: (w, l) => this.choose(w, l),
             onUndo: () => this.undo(),
             onShowResults: () => this.requestResults(),
+            onSetOrient: (mode) => {
+              this.session.setOrient(mode);
+              this.render();
+            },
           },
         );
       case 'result':

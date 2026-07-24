@@ -361,21 +361,88 @@ body {
   border-radius: 8px;
   overflow: hidden;
 }
-/*
- * Landscape notes fill the full cell width. Portrait notes are ~2× taller than
- * wide, so at full width they'd dwarf a landscape note. Constraining a portrait
- * note to ~54% width gives it the SAME visual area (footprint) as a full-width
- * landscape note — so both orientations read as "the same size" — while
- * landscape keeps its natural, space-filling look.
- */
 .note-face img {
   display: block;
   width: 100%;
   height: auto;
 }
-.note-face.portrait img {
+
+/*
+ * DEFAULT mode — native orientation. Landscape notes fill the full cell width;
+ * portrait notes are constrained to ~54% width so they have the same visual
+ * area (footprint) as a full-width landscape note, rather than towering.
+ */
+.mode-default .note-face img {
+  width: 100%;
+  height: auto;
+}
+.mode-default .note-face.portrait img {
   width: 54%;
   margin: 0 auto;
+}
+
+/*
+ * LANDSCAPE / PORTRAIT modes — force every note into one orientation by
+ * rotating the ones that don't match. Each face becomes a fixed-aspect slot;
+ * a mismatched image is sized in container-query units (100cqw / 100cqh) so
+ * that, once rotated 90°, it fills the slot exactly.
+ */
+.mode-landscape .note-face,
+.mode-portrait .note-face {
+  container-type: size;
+  display: grid;
+  place-items: center;
+}
+.mode-landscape .note-face {
+  aspect-ratio: 1418 / 733; /* landscape */
+}
+.mode-portrait .note-face {
+  aspect-ratio: 733 / 1418; /* portrait */
+}
+.mode-landscape .note-face img,
+.mode-portrait .note-face img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+/* rotate native-portrait notes into a landscape slot */
+.mode-landscape .note-face.portrait img {
+  width: auto;
+  height: 100cqw;
+  object-fit: unset;
+  transform: rotate(90deg);
+}
+/* rotate native-landscape notes into a portrait slot */
+.mode-portrait .note-face:not(.portrait) img {
+  width: 100cqh;
+  height: auto;
+  object-fit: unset;
+  transform: rotate(90deg);
+}
+
+/* orientation segmented control */
+.orient-toggle {
+  display: flex;
+  width: fit-content;
+  margin: 0 auto 1rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--surface);
+}
+.orient-toggle .orient {
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  padding: 0.4rem 1rem;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.orient-toggle .orient.active {
+  background: var(--accent);
+  color: var(--accent-ink);
 }
 .note-face figcaption {
   font-size: 0.68rem;
