@@ -100,7 +100,7 @@ function rankingRow(letter: Letter, rank: number): HTMLElement {
 
 function disclaimer(): HTMLElement {
   const survey = el('a', {
-    href: surveyUrl(getLang()),
+    href: surveyUrl(),
     target: '_blank',
     rel: 'noopener',
     text: t('surveyLinkText'),

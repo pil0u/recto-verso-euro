@@ -1,7 +1,7 @@
 /** App controller: screen routing, language, deep links, resume, share/pool. */
 
 import type { Letter } from './data/designs';
-import { getLang, setLang, LANGS, t, type Lang } from './i18n';
+import { getLang, setLang, langName, LANGS, t, type Lang } from './i18n';
 import { Session, hasStoredSession } from './session';
 import {
   buildShareText,
@@ -209,21 +209,16 @@ export class App {
       this.render();
     });
 
-    const toggle = el(
-      'div',
-      { class: 'lang-toggle', role: 'group', 'aria-label': 'Language' },
-      LANGS.map((lang) => {
-        const b = el('button', {
-          class: `lang${getLang() === lang ? ' active' : ''}`,
-          type: 'button',
-          text: lang.toUpperCase(),
-        });
-        on(b, 'click', () => this.switchLang(lang));
-        return b;
-      }),
+    const select = el(
+      'select',
+      { class: 'lang-select', 'aria-label': 'Language' },
+      LANGS.map((lang) =>
+        el('option', { value: lang, selected: getLang() === lang }, [langName(lang)]),
+      ),
     );
+    on(select, 'change', () => this.switchLang(select.value as Lang));
 
-    return el('header', { class: 'app-header' }, [brand, toggle]);
+    return el('header', { class: 'app-header' }, [brand, select]);
   }
 
   private footer(): HTMLElement {
@@ -242,7 +237,11 @@ export class App {
       type: 'button',
       text: t('seeResultsAnyway'),
     });
-    const keepGoing = el('button', { class: 'btn ghost', type: 'button', text: t('keepComparing') });
+    const keepGoing = el('button', {
+      class: 'btn ghost',
+      type: 'button',
+      text: t('keepComparing'),
+    });
     const overlay = el('div', { class: 'modal-overlay' }, [
       el('div', { class: 'modal', role: 'dialog', 'aria-modal': 'true' }, [
         el('h2', { text: t('earlyStopTitle') }),

@@ -41,7 +41,14 @@ html {
 body {
   margin: 0;
   font-family:
-    'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    'Inter',
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    Roboto,
+    Helvetica,
+    Arial,
+    sans-serif;
   background: var(--bg);
   color: var(--text);
   line-height: 1.5;
@@ -79,24 +86,31 @@ body {
   padding: 0;
 }
 
-.lang-toggle {
-  display: inline-flex;
+.lang-select {
   border: 1px solid var(--line);
   border-radius: 999px;
-  overflow: hidden;
-}
-.lang-toggle .lang {
-  border: 0;
   background: var(--surface);
-  color: var(--muted);
-  padding: 0.35rem 0.7rem;
-  font-size: 0.8rem;
+  color: var(--text);
+  padding: 0.35rem 2rem 0.35rem 0.9rem;
+  font-size: 0.85rem;
   font-weight: 600;
   cursor: pointer;
+  max-width: 11rem;
+  appearance: none;
+  background-image:
+    linear-gradient(45deg, transparent 50%, currentColor 50%),
+    linear-gradient(135deg, currentColor 50%, transparent 50%);
+  background-position:
+    calc(100% - 1.05rem) 55%,
+    calc(100% - 0.75rem) 55%;
+  background-size:
+    0.3rem 0.3rem,
+    0.3rem 0.3rem;
+  background-repeat: no-repeat;
 }
-.lang-toggle .lang.active {
-  background: var(--accent);
-  color: var(--accent-ink);
+.lang-select:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 .app-footer {
