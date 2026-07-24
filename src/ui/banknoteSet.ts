@@ -11,39 +11,57 @@ import {
 import { t } from '../i18n';
 import { el } from './dom';
 
-function note(letter: Letter, denom: Denomination, lazy: boolean): HTMLElement {
-  const face = (side: 'front' | 'back') =>
-    el('figure', { class: `note-face${isPortrait(letter, denom, side) ? ' portrait' : ''}` }, [
-      el('img', {
-        src: imageUrl(letter, denom, side),
-        alt: `Design ${letter} €${denom} ${side === 'front' ? t('recto') : t('verso')}`,
-        loading: lazy ? 'lazy' : 'eager',
-        decoding: 'async',
-      }),
-      el('figcaption', { text: side === 'front' ? t('recto') : t('verso') }),
-    ]);
+interface SetOptions {
+  /** Result-page hero: only the €50 front. */
+  compact?: boolean;
+  lazy?: boolean;
+  showTheme?: boolean;
+  /**
+   * When false, strip all text (design header, denomination labels, front/back
+   * captions) — a clean, unbiased side-by-side of just the artwork. Used in the
+   * comparison view so nothing nudges the choice.
+   */
+  chrome?: boolean;
+}
 
-  return el('div', { class: 'note' }, [
-    el('span', { class: 'denom', text: `€${denom}` }),
-    el('div', { class: 'faces' }, [face('front'), face('back')]),
+function face(letter: Letter, denom: Denomination, side: 'front' | 'back', opts: SetOptions) {
+  return el('figure', { class: `note-face${isPortrait(letter, denom, side) ? ' portrait' : ''}` }, [
+    el('img', {
+      src: imageUrl(letter, denom, side),
+      alt: `Design ${letter} €${denom} ${side === 'front' ? t('recto') : t('verso')}`,
+      loading: opts.lazy ? 'lazy' : 'eager',
+      decoding: 'async',
+    }),
+    opts.chrome === false
+      ? ''
+      : el('figcaption', { text: side === 'front' ? t('recto') : t('verso') }),
   ]);
 }
 
-/**
- * A full set panel. `compact` (used on the result page) shows only the €50
- * front as a representative hero; otherwise all six denominations are shown.
- */
-export function banknoteSet(
-  letter: Letter,
-  opts: { compact?: boolean; lazy?: boolean; showTheme?: boolean } = {},
-): HTMLElement {
+function note(letter: Letter, denom: Denomination, opts: SetOptions): HTMLElement {
+  const faces = el('div', { class: 'faces' }, [
+    face(letter, denom, 'front', opts),
+    face(letter, denom, 'back', opts),
+  ]);
+  return el('div', { class: 'note' }, [
+    opts.chrome === false ? '' : el('span', { class: 'denom', text: `€${denom}` }),
+    faces,
+  ]);
+}
+
+export function banknoteSet(letter: Letter, opts: SetOptions = {}): HTMLElement {
   const design = getDesign(letter);
   const themeLabel = design.theme === 'culture' ? t('themeCulture') : t('themeRivers');
 
-  const header = el('div', { class: 'set-header' }, [
-    el('span', { class: 'set-letter', text: `Design ${letter}` }),
-    opts.showTheme ? el('span', { class: `theme theme-${design.theme}`, text: themeLabel }) : '',
-  ]);
+  const header =
+    opts.chrome === false
+      ? ''
+      : el('div', { class: 'set-header' }, [
+          el('span', { class: 'set-letter', text: `Design ${letter}` }),
+          opts.showTheme
+            ? el('span', { class: `theme theme-${design.theme}`, text: themeLabel })
+            : '',
+        ]);
 
   if (opts.compact) {
     return el('div', { class: 'set compact' }, [
@@ -61,6 +79,9 @@ export function banknoteSet(
     ]);
   }
 
-  const notes = DENOMINATIONS.map((d) => note(letter, d, opts.lazy ?? true));
-  return el('div', { class: 'set' }, [header, el('div', { class: 'notes' }, notes)]);
+  const notes = DENOMINATIONS.map((d) => note(letter, d, { ...opts, lazy: opts.lazy ?? true }));
+  return el('div', { class: `set${opts.chrome === false ? ' bare' : ''}` }, [
+    header,
+    el('div', { class: 'notes' }, notes),
+  ]);
 }

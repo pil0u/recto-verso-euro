@@ -27,13 +27,9 @@ export function buildShareText(result: SharedResult): string {
     .slice(0, 3)
     .map((letter, i) => `${MEDALS[i]} Design ${letter}`)
     .join('\n');
-  return [
-    `${t('appName')} 🇪🇺 💶`,
-    t('shareHeadline'),
-    top3,
-    `${t('shareConfidence')}: ${stars(result.confidence)}`,
-    `→ ${buildDeepLink(result)}`,
-  ].join('\n');
+  return [`${t('appName')} 🇪🇺 💶`, t('shareHeadline'), top3, `→ ${buildDeepLink(result)}`].join(
+    '\n',
+  );
 }
 
 /** App URL carrying the ranking + confidence in the hash. */

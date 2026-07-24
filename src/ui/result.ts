@@ -3,7 +3,6 @@
 import { ecbDesignUrl, getDesign, type Letter } from '../data/designs';
 import { poolEnabled } from '../config';
 import { getLang, t, ECB_SURVEY_URL } from '../i18n';
-import { stars } from '../share';
 import { banknoteSet } from './banknoteSet';
 import { el, on } from './dom';
 
@@ -24,16 +23,6 @@ export interface ResultViewState {
 const MEDALS = ['🥇', '🥈', '🥉'];
 
 export function resultView(state: ResultViewState, cb: ResultCallbacks): HTMLElement {
-  const pct = Math.round(state.confidence * 100);
-
-  const confidenceEl = el('div', { class: 'confidence-badge' }, [
-    el('span', { class: 'stars', text: stars(state.confidence) }),
-    el('span', {
-      class: 'conf-label',
-      text: state.complete ? `${t('complete')} · 100%` : `${t('confidence')}: ${pct}%`,
-    }),
-  ]);
-
   const podium = el(
     'div',
     { class: 'podium' },
@@ -78,7 +67,6 @@ export function resultView(state: ResultViewState, cb: ResultCallbacks): HTMLEle
 
   return el('section', { class: 'screen result' }, [
     el('h1', { class: 'result-title', text: t('resultTitle') }),
-    confidenceEl,
     el('h2', { class: 'section-title', text: t('yourPodium') }),
     podium,
     actions,

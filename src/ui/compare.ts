@@ -1,4 +1,4 @@
-/** The comparison screen: two sets, pick the one you prefer. */
+/** The comparison screen: two sets, pick the one you prefer via big side buttons. */
 
 import type { Letter } from '../data/designs';
 import { t } from '../i18n';
@@ -45,26 +45,26 @@ export function compareView(state: CompareViewState, cb: CompareCallbacks): HTML
     el('div', { class: 'controls' }, [undoBtn, resultsBtn]),
   ]);
 
-  const side = (letter: Letter, label: string) => {
-    const chooseBtn = el('button', { class: 'btn primary choose', type: 'button', text: label });
-    const panel = el('div', { class: 'side', role: 'group' }, [
-      chooseBtn,
-      banknoteSet(letter, { showTheme: true, lazy: false }),
+  // Big buttons pinned to the left and right edges, always reachable while scrolling.
+  const preferBtn = (dir: 'left' | 'right', winner: Letter) => {
+    const btn = el('button', { class: `prefer-btn ${dir}`, type: 'button' }, [
+      el('span', { class: 'prefer-arrow', 'aria-hidden': 'true', text: dir === 'left' ? '‹' : '›' }),
+      el('span', { class: 'prefer-label', text: t('preferLeft') }),
     ]);
-    const choose = () => cb.onChoose(letter, letter === a ? b : a);
-    on(chooseBtn, 'click', choose);
-    return panel;
+    on(btn, 'click', () => cb.onChoose(winner, winner === a ? b : a));
+    return btn;
   };
 
   const arena = el('div', { class: 'arena' }, [
-    side(a, t('preferLeft')),
-    el('div', { class: 'versus', text: 'vs', 'aria-hidden': 'true' }),
-    side(b, t('preferRight')),
+    el('div', { class: 'side' }, [banknoteSet(a, { chrome: false, lazy: false })]),
+    el('div', { class: 'side' }, [banknoteSet(b, { chrome: false, lazy: false })]),
   ]);
 
   return el('section', { class: 'screen compare' }, [
     top,
     el('h2', { class: 'which', text: t('which') }),
     arena,
+    preferBtn('left', a),
+    preferBtn('right', b),
   ]);
 }
