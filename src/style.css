@@ -383,15 +383,16 @@ body {
 
 /*
  * LANDSCAPE / PORTRAIT modes — force every note into one orientation by
- * rotating the ones that don't match. Each face becomes a fixed-aspect slot;
- * a mismatched image is sized in container-query units (100cqw / 100cqh) so
- * that, once rotated 90°, it fills the slot exactly.
+ * rotating the ones that don't match. Each face becomes a fixed-aspect slot
+ * that is also a size query container. A note already in the right orientation
+ * just fills the slot; a mismatched note is absolutely centred (reliable even
+ * though it overflows before rotation) and sized in container-query units
+ * (100cqw / 100cqh) so that, once rotated 90°, it fills the slot exactly.
  */
 .mode-landscape .note-face,
 .mode-portrait .note-face {
   container-type: size;
-  display: grid;
-  place-items: center;
+  position: relative;
 }
 .mode-landscape .note-face {
   aspect-ratio: 1418 / 733; /* landscape */
@@ -399,25 +400,31 @@ body {
 .mode-portrait .note-face {
   aspect-ratio: 733 / 1418; /* portrait */
 }
-.mode-landscape .note-face img,
-.mode-portrait .note-face img {
+/* notes already in the target orientation fill the slot normally */
+.mode-landscape .note-face:not(.portrait) img,
+.mode-portrait .note-face.portrait img {
   width: 100%;
   height: 100%;
   object-fit: contain;
 }
-/* rotate native-portrait notes into a landscape slot */
+/* rotate mismatched notes, centred via absolute positioning */
+.mode-landscape .note-face.portrait img,
+.mode-portrait .note-face:not(.portrait) img {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(90deg);
+  object-fit: fill;
+}
+/* portrait note → landscape slot: pre-rotation height = slot width */
 .mode-landscape .note-face.portrait img {
   width: auto;
   height: 100cqw;
-  object-fit: unset;
-  transform: rotate(90deg);
 }
-/* rotate native-landscape notes into a portrait slot */
+/* landscape note → portrait slot: pre-rotation width = slot height */
 .mode-portrait .note-face:not(.portrait) img {
   width: 100cqh;
   height: auto;
-  object-fit: unset;
-  transform: rotate(90deg);
 }
 
 /* orientation segmented control */
