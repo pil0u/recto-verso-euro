@@ -83,6 +83,12 @@ export class App {
   private choose(winner: Letter, loser: Letter): void {
     if (this.currentPair) this.pairHistory.push(this.currentPair);
     this.session.record(winner, loser);
+    // Stop as soon as the ranking is fully settled, not only when pairs run out.
+    if (this.session.isComplete()) {
+      this.currentPair = null;
+      this.goResult();
+      return;
+    }
     this.currentPair = this.session.nextPair();
     if (!this.currentPair) this.goResult();
     else this.render();

@@ -112,27 +112,25 @@ export class RatingModel<T extends string = string> {
   /**
    * Overall confidence in the ranking, 0 → 1.
    *
-   * Measured as the fraction of total pairwise uncertainty we've eliminated:
-   * average the binary entropy of the predicted outcome over every pair and
-   * compare it to the maximum (ln 2, when every outcome is a coin-flip).
-   * No data → every outcome 50/50 → confidence 0. As comparisons resolve the
-   * order, predicted outcomes sharpen and confidence climbs toward 1. This
-   * mirrors "how much of the guessing have we removed", which is exactly the
-   * progress signal a user feels while answering.
+   * The fraction of the ranking's adjacent steps that are "settled". An adjacent
+   * pair counts as settled if the two items were compared directly, or if the
+   * model already predicts their order decisively (transitivity). This reaches
+   * 1 exactly when the whole order is pinned down — which is what "done" should
+   * mean — instead of asymptotically stalling below 100%.
+   *
+   * No data → nothing settled → 0.
    */
   confidence(): number {
-    const n = this.items.length;
-    if (n < 2) return 1;
-    let sum = 0;
-    let pairs = 0;
-    for (let i = 0; i < n; i++) {
-      for (let j = i + 1; j < n; j++) {
-        sum += binaryEntropy(this.probability(this.items[i], this.items[j]));
-        pairs++;
-      }
+    const order = this.ranking();
+    if (order.length < 2) return 1;
+    const asked = new Set(this.comparisons.map((c) => pairKey(c.winner, c.loser)));
+    let settled = 0;
+    for (let k = 0; k < order.length - 1; k++) {
+      const a = order[k];
+      const b = order[k + 1];
+      if (asked.has(pairKey(a, b)) || this.probability(a, b) >= RESOLVED_P) settled++;
     }
-    const meanEntropy = sum / pairs;
-    return clamp(1 - meanEntropy / Math.LN2, 0, 1);
+    return settled / (order.length - 1);
   }
 
   /**
@@ -164,12 +162,17 @@ export class RatingModel<T extends string = string> {
     return rng() < 0.5 ? chosen.pair : [chosen.pair[1], chosen.pair[0]];
   }
 
-  /** True when there is no longer any informative pair to ask. */
+  /**
+   * True when the ranking is fully determined — every adjacent step settled —
+   * or there is simply no informative pair left to ask.
+   */
   isComplete(minEntropy = MIN_ENTROPY): boolean {
-    return this.nextPair(() => 0, minEntropy) === null;
+    return this.confidence() >= 1 || this.nextPair(() => 0, minEntropy) === null;
   }
 }
 
+/** A predicted win probability at/above this counts an adjacency as settled. */
+const RESOLVED_P = 0.75;
 /** Below this outcome-entropy (nats), a pair is considered already decided. */
 const MIN_ENTROPY = 0.2; // ≈ p outside [0.03, 0.97] region weighted; see binaryEntropy
 /** Pairs within this entropy of the best are treated as equally informative. */
@@ -185,10 +188,6 @@ function sigmoid(x: number): number {
 function binaryEntropy(p: number): number {
   if (p <= 0 || p >= 1) return 0;
   return -p * Math.log(p) - (1 - p) * Math.log(1 - p);
-}
-
-function clamp(x: number, lo: number, hi: number): number {
-  return Math.min(hi, Math.max(lo, x));
 }
 
 /** Canonical, order-independent key for a pair. */

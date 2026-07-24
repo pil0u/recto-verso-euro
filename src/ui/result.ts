@@ -1,8 +1,8 @@
 /** The result screen: podium, full ranking, confidence, share, pool, restart. */
 
-import { ecbDesignUrl, getDesign, type Letter } from '../data/designs';
+import { designDescription, ecbDesignUrl, getDesign, type Letter } from '../data/designs';
 import { poolEnabled } from '../config';
-import { getLang, t, ECB_SURVEY_URL } from '../i18n';
+import { getLang, surveyUrl, t } from '../i18n';
 import { banknoteSet } from './banknoteSet';
 import { el, on } from './dom';
 
@@ -86,7 +86,7 @@ function rankingRow(letter: Letter, rank: number): HTMLElement {
     el('span', { class: `theme theme-${design.theme}`, text: themeLabel }),
   ]);
   const body = el('div', { class: 'rank-body' }, [
-    el('p', { class: 'rank-desc', text: design.description[getLang()] }),
+    el('p', { class: 'rank-desc', text: designDescription(letter, getLang()) }),
     el('a', {
       class: 'ecb-link',
       href: ecbDesignUrl(letter, getLang()),
@@ -100,12 +100,11 @@ function rankingRow(letter: Letter, rank: number): HTMLElement {
 
 function disclaimer(): HTMLElement {
   const survey = el('a', {
-    href: ECB_SURVEY_URL,
+    href: surveyUrl(getLang()),
     target: '_blank',
     rel: 'noopener',
-    text: getLang() === 'fr' ? 'enquête officielle de la BCE' : 'official ECB survey',
+    text: t('surveyLinkText'),
   });
-  const text = t('disclaimer');
-  const [before, after] = text.split('{survey}');
+  const [before, after] = t('disclaimer').split('{survey}');
   return el('p', { class: 'disclaimer' }, [before, survey, after ?? '']);
 }

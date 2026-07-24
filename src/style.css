@@ -389,23 +389,26 @@ body {
  * though it overflows before rotation) and sized in container-query units
  * (100cqw / 100cqh) so that, once rotated 90°, it fills the slot exactly.
  */
-.mode-landscape .note-face,
-.mode-portrait .note-face {
+/* Only the MISMATCHED faces become fixed-aspect query-container slots to rotate
+ * into. Faces already in the target orientation are left at their natural
+ * aspect ratio (no slot, no object-fit) so they render exactly as in Default
+ * mode — no letterboxing or resizing. */
+.mode-landscape .note-face.portrait,
+.mode-portrait .note-face:not(.portrait) {
   container-type: size;
   position: relative;
 }
-.mode-landscape .note-face {
-  aspect-ratio: 1418 / 733; /* landscape */
+.mode-landscape .note-face.portrait {
+  aspect-ratio: 1418 / 733; /* landscape slot for a rotated portrait note */
 }
-.mode-portrait .note-face {
-  aspect-ratio: 733 / 1418; /* portrait */
+.mode-portrait .note-face:not(.portrait) {
+  aspect-ratio: 733 / 1418; /* portrait slot for a rotated landscape note */
 }
-/* notes already in the target orientation fill the slot normally */
+/* notes already in the target orientation: natural aspect, untouched */
 .mode-landscape .note-face:not(.portrait) img,
 .mode-portrait .note-face.portrait img {
   width: 100%;
-  height: 100%;
-  object-fit: contain;
+  height: auto;
 }
 /* rotate mismatched notes, centred via absolute positioning */
 .mode-landscape .note-face.portrait img,
@@ -509,8 +512,29 @@ body {
 .podium-slot .medal {
   font-size: 1.6rem;
 }
-.set.compact .note.hero img {
+/* Podium hero: a uniform landscape box for all three winners. Portrait designs
+ * are rotated into it so the podium isn't dominated by a giant portrait note. */
+.set.compact .note-face {
+  aspect-ratio: 1418 / 733;
+  container-type: size;
+  position: relative;
+  overflow: hidden;
   border-radius: 8px;
+  background: var(--surface-2);
+}
+.set.compact .note-face img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.set.compact .note-face.portrait img {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: auto;
+  height: 100cqw;
+  object-fit: fill;
+  transform: translate(-50%, -50%) rotate(90deg);
 }
 
 .result-actions {

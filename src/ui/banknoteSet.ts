@@ -64,10 +64,13 @@ export function banknoteSet(letter: Letter, opts: SetOptions = {}): HTMLElement 
         ]);
 
   if (opts.compact) {
+    // Uniform landscape hero on the podium; portrait designs are rotated so all
+    // three winners are shown at the same size and orientation.
+    const portrait = isPortrait(letter, 50, 'front');
     return el('div', { class: 'set compact' }, [
       header,
       el('div', { class: 'note hero' }, [
-        el('figure', { class: 'note-face' }, [
+        el('figure', { class: `note-face${portrait ? ' portrait' : ''}` }, [
           el('img', {
             src: imageUrl(letter, 50, 'front'),
             alt: `Design ${letter} €50 ${t('recto')}`,
