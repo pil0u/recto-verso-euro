@@ -1,15 +1,9 @@
-/** App controller: screen routing, language, deep links, resume, share/pool. */
+/** App controller: screen routing, language, deep links, resume, share. */
 
 import type { Letter } from './data/designs';
 import { getLang, setLang, langName, LANGS, t, type Lang } from './i18n';
 import { Session, hasStoredSession } from './session';
-import {
-  buildShareText,
-  copyToClipboard,
-  parseDeepLink,
-  submitToPool,
-  type SharedResult,
-} from './share';
+import { buildShareText, copyToClipboard, parseDeepLink, type SharedResult } from './share';
 import { clear, el, on } from './ui/dom';
 import { compareView } from './ui/compare';
 import { resultView } from './ui/result';
@@ -121,10 +115,6 @@ export class App {
     await copyToClipboard(buildShareText(this.currentResult()));
   }
 
-  private async pool(): Promise<void> {
-    await submitToPool(this.currentResult());
-  }
-
   // --- rendering ----------------------------------------------------------
 
   private render(): void {
@@ -179,7 +169,6 @@ export class App {
         this.startFresh();
       },
       onShare: () => this.share(),
-      onPool: () => this.pool(),
     };
   }
 

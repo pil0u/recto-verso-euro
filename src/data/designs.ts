@@ -31,8 +31,7 @@ export function designDescription(letter: Letter, lang: Lang): string {
 }
 
 /** Base directory for the individual per-note images on the ECB site. */
-const IMG_BASE =
-  'https://www.ecb.europa.eu/euro/banknotes/future_banknotes/shared/img';
+const IMG_BASE = 'https://www.ecb.europa.eu/euro/banknotes/future_banknotes/shared/img';
 
 /**
  * Verified image URL pattern (all 120 combinations confirmed to exist):

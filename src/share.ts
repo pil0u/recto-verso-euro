@@ -1,12 +1,11 @@
 /**
  * Sharing: a clean plain-text summary (Wordle-style) plus a deep link that
  * encodes the full ranking so a click reopens the app straight on the shared
- * result. Also the optional, opt-in anonymous pool submission.
+ * result.
  */
 
 import { LETTERS, type Letter } from './data/designs';
-import { POOL, poolEnabled } from './config';
-import { t, getLang, type Lang } from './i18n';
+import { t } from './i18n';
 
 const MEDALS = ['🥇', '🥈', '🥉'];
 
@@ -74,29 +73,5 @@ export async function copyToClipboard(text: string): Promise<boolean> {
     } catch {
       return false;
     }
-  }
-}
-
-/**
- * Fire-and-forget anonymous submission to the configured Google Form.
- * Uses `no-cors` (Google Forms doesn't return CORS headers), so we can't read
- * the response — we assume success unless the request itself throws.
- */
-export async function submitToPool(result: SharedResult, lang: Lang = getLang()): Promise<boolean> {
-  if (!poolEnabled()) return false;
-  const body = new URLSearchParams();
-  body.set(POOL.fields.ranking, result.ranking.join(''));
-  body.set(POOL.fields.confidence, String(Math.round(result.confidence * 100)));
-  body.set(POOL.fields.lang, lang);
-  try {
-    await fetch(POOL.formActionUrl, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: body.toString(),
-    });
-    return true;
-  } catch {
-    return false;
   }
 }

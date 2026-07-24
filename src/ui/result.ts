@@ -1,7 +1,6 @@
-/** The result screen: podium, full ranking, confidence, share, pool, restart. */
+/** The result screen: podium, full ranking, confidence, share, restart. */
 
 import { designDescription, ecbDesignUrl, getDesign, type Letter } from '../data/designs';
-import { poolEnabled } from '../config';
 import { getLang, surveyUrl, t } from '../i18n';
 import { banknoteSet } from './banknoteSet';
 import { el, on } from './dom';
@@ -9,7 +8,6 @@ import { el, on } from './dom';
 export interface ResultCallbacks {
   onRestart: () => void;
   onShare: () => Promise<void> | void;
-  onPool: () => Promise<void> | void;
 }
 
 export interface ResultViewState {
@@ -26,12 +24,14 @@ export function resultView(state: ResultViewState, cb: ResultCallbacks): HTMLEle
   const podium = el(
     'div',
     { class: 'podium' },
-    state.ranking.slice(0, 3).map((letter, i) =>
-      el('div', { class: `podium-slot rank-${i + 1}` }, [
-        el('span', { class: 'medal', text: MEDALS[i] }),
-        banknoteSet(letter, { compact: true, showTheme: true }),
-      ]),
-    ),
+    state.ranking
+      .slice(0, 3)
+      .map((letter, i) =>
+        el('div', { class: `podium-slot rank-${i + 1}` }, [
+          el('span', { class: 'medal', text: MEDALS[i] }),
+          banknoteSet(letter, { compact: true, showTheme: true }),
+        ]),
+      ),
   );
 
   const list = el(
@@ -50,16 +50,6 @@ export function resultView(state: ResultViewState, cb: ResultCallbacks): HTMLEle
   });
 
   const actions = el('div', { class: 'result-actions' }, [shareBtn]);
-
-  if (poolEnabled()) {
-    const poolBtn = el('button', { class: 'btn', type: 'button', text: t('addToPool') });
-    on(poolBtn, 'click', async () => {
-      poolBtn.disabled = true;
-      await cb.onPool();
-      poolBtn.textContent = t('pooled');
-    });
-    actions.append(poolBtn);
-  }
 
   const restartBtn = el('button', { class: 'btn ghost', type: 'button', text: t('startOver') });
   on(restartBtn, 'click', cb.onRestart);

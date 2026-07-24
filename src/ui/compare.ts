@@ -51,7 +51,11 @@ export function compareView(state: CompareViewState, cb: CompareCallbacks): HTML
   // Big buttons pinned to the left and right edges, always reachable while scrolling.
   const preferBtn = (dir: 'left' | 'right', winner: Letter) => {
     const btn = el('button', { class: `prefer-btn ${dir}`, type: 'button' }, [
-      el('span', { class: 'prefer-arrow', 'aria-hidden': 'true', text: dir === 'left' ? '‹' : '›' }),
+      el('span', {
+        class: 'prefer-arrow',
+        'aria-hidden': 'true',
+        text: dir === 'left' ? '‹' : '›',
+      }),
       el('span', { class: 'prefer-label', text: t('preferLeft') }),
     ]);
     on(btn, 'click', () => cb.onChoose(winner, winner === a ? b : a));
