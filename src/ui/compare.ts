@@ -9,7 +9,6 @@ export interface CompareCallbacks {
   onChoose: (winner: Letter, loser: Letter) => void;
   onUndo: () => void;
   onShowResults: () => void;
-  onToggleFlip: () => void;
 }
 
 export interface CompareViewState {
@@ -17,7 +16,6 @@ export interface CompareViewState {
   count: number;
   confidence: number; // 0..1
   canUndo: boolean;
-  flipped: boolean;
 }
 
 export function compareView(state: CompareViewState, cb: CompareCallbacks): HTMLElement {
@@ -34,14 +32,8 @@ export function compareView(state: CompareViewState, cb: CompareCallbacks): HTML
     text: t('undo'),
     disabled: !state.canUndo,
   });
-  const flipBtn = el('button', {
-    class: `btn ghost${state.flipped ? ' active' : ''}`,
-    type: 'button',
-    text: t('flip'),
-  });
   const resultsBtn = el('button', { class: 'btn ghost', type: 'button', text: t('showResults') });
   on(undoBtn, 'click', cb.onUndo);
-  on(flipBtn, 'click', cb.onToggleFlip);
   on(resultsBtn, 'click', cb.onShowResults);
 
   const top = el('div', { class: 'compare-top' }, [
@@ -50,7 +42,7 @@ export function compareView(state: CompareViewState, cb: CompareCallbacks): HTML
       confBar,
       el('span', { class: 'conf-pct', text: `${pct}%` }),
     ]),
-    el('div', { class: 'controls' }, [undoBtn, flipBtn, resultsBtn]),
+    el('div', { class: 'controls' }, [undoBtn, resultsBtn]),
   ]);
 
   const side = (letter: Letter, label: string) => {
@@ -64,7 +56,7 @@ export function compareView(state: CompareViewState, cb: CompareCallbacks): HTML
     return panel;
   };
 
-  const arena = el('div', { class: `arena${state.flipped ? ' flipped' : ''}` }, [
+  const arena = el('div', { class: 'arena' }, [
     side(a, t('preferLeft')),
     el('div', { class: 'versus', text: 'vs', 'aria-hidden': 'true' }),
     side(b, t('preferRight')),

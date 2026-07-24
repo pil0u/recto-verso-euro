@@ -135,16 +135,11 @@ export class App {
             count: this.session.count(),
             confidence: this.session.confidence(),
             canUndo: this.session.canUndo(),
-            flipped: this.session.flipped,
           },
           {
             onChoose: (w, l) => this.choose(w, l),
             onUndo: () => this.undo(),
             onShowResults: () => this.requestResults(),
-            onToggleFlip: () => {
-              this.session.setFlipped(!this.session.flipped);
-              this.render();
-            },
           },
         );
       case 'result':

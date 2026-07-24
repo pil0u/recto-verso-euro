@@ -11,14 +11,15 @@ const STORAGE_KEY = 'rve.session';
 
 export interface PersistedSession {
   comparisons: Comparison<Letter>[];
-  flipped: boolean;
+  peak: number;
   finished: boolean;
 }
 
 export class Session {
   private comparisons: Comparison<Letter>[] = [];
-  flipped = false;
   finished = false;
+  /** Highest confidence reached this run, so the displayed value never drops. */
+  private peak = 0;
   private modelCache: RatingModel<Letter> | null = null;
 
   constructor(restore = true) {
@@ -49,6 +50,7 @@ export class Session {
   record(winner: Letter, loser: Letter): void {
     this.comparisons.push({ winner, loser });
     this.invalidate();
+    this.peak = Math.max(this.peak, this.model().confidence());
     this.save();
   }
 
@@ -56,6 +58,8 @@ export class Session {
     this.comparisons.pop();
     this.finished = false;
     this.invalidate();
+    // Removing an answer legitimately lowers certainty; re-baseline the peak.
+    this.peak = this.comparisons.length > 0 ? this.model().confidence() : 0;
     this.save();
   }
 
@@ -63,8 +67,9 @@ export class Session {
     return this.model().ranking();
   }
 
+  /** Monotonic within a run: the highest confidence reached so far. */
   confidence(): number {
-    return this.model().confidence();
+    return this.peak;
   }
 
   isComplete(): boolean {
@@ -78,15 +83,10 @@ export class Session {
 
   reset(): void {
     this.comparisons = [];
-    this.flipped = false;
+    this.peak = 0;
     this.finished = false;
     this.invalidate();
     clearStored();
-  }
-
-  setFlipped(flipped: boolean): void {
-    this.flipped = flipped;
-    this.save();
   }
 
   private invalidate(): void {
@@ -96,7 +96,7 @@ export class Session {
   private save(): void {
     const data: PersistedSession = {
       comparisons: this.comparisons,
-      flipped: this.flipped,
+      peak: this.peak,
       finished: this.finished,
     };
     try {
@@ -116,8 +116,14 @@ export class Session {
           (c) => LETTERS.includes(c.winner) && LETTERS.includes(c.loser),
         );
       }
-      this.flipped = Boolean(data.flipped);
       this.finished = Boolean(data.finished);
+      this.invalidate();
+      this.peak =
+        typeof data.peak === 'number'
+          ? data.peak
+          : this.comparisons.length > 0
+            ? this.model().confidence()
+            : 0;
     } catch {
       /* corrupt storage — start fresh */
     }

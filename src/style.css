@@ -245,6 +245,7 @@ body {
 }
 
 .arena {
+  --face-h: clamp(130px, 17vw, 200px);
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   align-items: start;
@@ -323,27 +324,25 @@ body {
   border-radius: 8px;
   overflow: hidden;
 }
+/*
+ * Every note-face image gets the SAME fixed height with object-fit: contain.
+ * This keeps the same denomination aligned row-by-row across the two columns
+ * even when one design is portrait and the other landscape — a portrait note
+ * fills the height (pillar-boxed), a landscape note fills the width
+ * (letter-boxed), but both rows are the same height, so €20 always sits beside
+ * €20. --face-h scales with the viewport.
+ */
 .note-face img {
   display: block;
   width: 100%;
-  height: auto;
+  height: var(--face-h, 150px);
+  object-fit: contain;
 }
 .note-face figcaption {
   font-size: 0.68rem;
   color: var(--muted);
   text-align: center;
   padding: 0.15rem;
-}
-/* the single portrait outlier (Design D €200 front) */
-.note-face.portrait img {
-  max-height: 320px;
-  width: auto;
-  margin: 0 auto;
-}
-
-/* flip: rotate every banknote image a quarter turn */
-.arena.flipped .note-face img {
-  transform: rotate(90deg) scale(0.66);
 }
 
 /* --- result --- */

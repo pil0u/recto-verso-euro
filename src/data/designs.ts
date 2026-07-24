@@ -37,11 +37,15 @@ export function imageUrl(letter: Letter, denom: Denomination, side: Side): strin
 }
 
 /**
- * Native orientation of every image is landscape, with a single exception:
- * Design D's €200 front is portrait (910×1807). Layout must give it a taller cell.
+ * Displayed orientation of each note (the ECB JPEGs carry EXIF rotation, so the
+ * *rendered* orientation — what a browser shows — is what matters here):
+ *   - Designs G, I, J are portrait on every note.
+ *   - Design D is mixed: fronts portrait, backs landscape.
+ *   - All other designs (A, B, C, E, F, H) are landscape throughout.
  */
-export function isPortrait(letter: Letter, denom: Denomination, side: Side): boolean {
-  return letter === 'D' && denom === 200 && side === 'front';
+export function isPortrait(letter: Letter, _denom: Denomination, side: Side): boolean {
+  if (letter === 'G' || letter === 'I' || letter === 'J') return true;
+  return letter === 'D' && side === 'front';
 }
 
 /** Official ECB page for a given design's language (anchored to the design). */
